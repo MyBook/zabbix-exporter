@@ -3,7 +3,7 @@ __author__ = 'MyBook'
 __email__ = 'dev@mybook.ru'
 __version__ = '0.1.0'
 
-envvar_prefix = 'zabbix'
+envvar_prefix = 'ZABBIX'
 
 
 def main():
