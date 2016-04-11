@@ -1,0 +1,14 @@
+{
+    "jsonrpc": "2.0",
+    "result": [
+        {
+            "name": "rough-snowflake-db",
+            "hostid": "3"
+        },
+        {
+            "name": "rough-snowflake-web",
+            "hostid": "4"
+        }
+    ],
+    "id":1
+}
