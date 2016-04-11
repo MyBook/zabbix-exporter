@@ -53,14 +53,15 @@ def cli(**settings):
 
        YAML:
 
-       metrics:
-         - key: 'local.metric[uwsgi,workers,*,*]'
-           name: 'uwsgi_workers'
-           labels:
-             app: $1
-             status: $2
-           labels_reject:
-             - 'total'
+       \b
+           metrics:
+             - key: 'local.metric[uwsgi,workers,*,*]'
+               name: 'uwsgi_workers'
+               labels:
+                 app: $1
+                 status: $2
+               labels_reject:
+                 - 'total'
     """
     if settings['version']:
         click.echo('Version %s' % zabbix_exporter.__version__)
