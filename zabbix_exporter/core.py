@@ -1,14 +1,16 @@
 # coding: utf-8
 import logging
 import re
-from .compat import BaseHTTPRequestHandler
-from .prometheus import GaugeMetricFamily, generate_latest
 
 import pyzabbix
 from prometheus_client import CONTENT_TYPE_LATEST, REGISTRY
 
+from .compat import BaseHTTPRequestHandler
+from .prometheus import GaugeMetricFamily, generate_latest
+from .utils import SortedDict
 
 logger = logging.getLogger(__name__)
+
 
 
 def sanitize_key(string):
@@ -17,15 +19,6 @@ def sanitize_key(string):
 
 def prepare_regex(key_pattern):
     return re.escape(key_pattern).replace('\*', '([^,]*?)')
-
-
-class SortedDict(dict):
-    """Hackish container to guarantee consistent label sequence for prometheus"""
-    def keys(self):
-        return sorted(super(SortedDict, self).keys())
-
-    def values(self):
-        return [self[key] for key in self.keys()]
 
 
 class ZabbixCollector(object):
@@ -61,10 +54,10 @@ class ZabbixCollector(object):
                     labels_mapping[label_name] = label_value
                 metric_options = attrs
                 break
-
-        if not labels_mapping and self.options.get('explicit_metrics', False):
-            logger.debug('Dropping implicit metric name %s', item['key_'])
-            return None
+        else:
+            if self.options.get('explicit_metrics', False):
+                logger.debug('Dropping implicit metric name %s', item['key_'])
+                return None
 
         # automatic host -> instance labeling
         labels_mapping['instance'] = self.host_mapping[item['hostid']]

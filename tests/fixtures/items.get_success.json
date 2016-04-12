@@ -54,6 +54,15 @@
             "value_type": "3",
             "lastclock": "1460359140",
             "lastvalue": "16.2"
+        },
+        {
+            "itemid": "130",
+            "name": "ZFS bytes",
+            "key_": "zfs.total_bytes",
+            "hostid": "3",
+            "value_type": "3",
+            "lastclock": "1460359140",
+            "lastvalue": "23243473482"
         }
     ],
     "id":1

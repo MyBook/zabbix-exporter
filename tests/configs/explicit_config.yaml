@@ -14,3 +14,4 @@ metrics:
       labels:
         app: $1
     - key: 'system.metric'
+    - key: 'zfs.total_bytes'
