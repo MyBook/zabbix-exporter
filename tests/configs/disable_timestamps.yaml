@@ -1,6 +1,6 @@
 ---
 explicit_metrics: true
-enable_timestamps: true
+enable_timestamps: false
 metrics:
     - key: 'local.metric[uwsgi,workers,*,*]'
       name: 'uwsgi_workers'

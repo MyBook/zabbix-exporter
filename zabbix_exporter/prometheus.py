@@ -36,7 +36,7 @@ def generate_latest(registry=core.REGISTRY):
             else:
                 labelstr = ''
             output.append('{0}{1} {2}{3}\n'.format(name, labelstr, core._floatToGoString(value),
-                                                   ' %s' % timestamp or ''))
+                                                   ' %s' % timestamp if timestamp else ''))
     return ''.join(output).encode('utf-8')
 
 
@@ -174,7 +174,7 @@ def _parse_sample(text):
                 raise ValueError("Invalid line: " + text)
             else:
                 timestamp.append(char)
-    return (''.join(name), labels, float(''.join(value)), int(''.join(timestamp) or 0))
+    return (''.join(name), labels, float(''.join(value)), int(''.join(timestamp)) if timestamp else None)
 
 
 def text_fd_to_metric_families(fd):

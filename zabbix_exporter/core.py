@@ -74,6 +74,7 @@ class ZabbixCollector(object):
                                    sortfield='key_')
         exposed_metrics = set()
         gauge = None
+        enable_timestamps = self.options.get('enable_timestamps', False)
 
         for item in items:
             if not self.is_exportable(item):
@@ -91,7 +92,7 @@ class ZabbixCollector(object):
                                           labels=metric['labels_mapping'].keys())
                 exposed_metrics.add(metric['name'])
             gauge.add_metric(metric['labels_mapping'].values(), float(item['lastvalue']),
-                             int(item['lastclock']))
+                             int(item['lastclock']) if enable_timestamps else None)
         if gauge:
             yield gauge
 
