@@ -2,10 +2,10 @@
 import logging
 import re
 from .compat import BaseHTTPRequestHandler
+from .prometheus import GaugeMetricFamily, generate_latest
 
 import pyzabbix
-from prometheus_client import generate_latest, CONTENT_TYPE_LATEST, REGISTRY
-from prometheus_client.core import GaugeMetricFamily
+from prometheus_client import CONTENT_TYPE_LATEST, REGISTRY
 
 
 logger = logging.getLogger(__name__)
@@ -94,10 +94,11 @@ class ZabbixCollector(object):
                 if gauge:
                     yield gauge
                 gauge = GaugeMetricFamily(name=metric['name'],
-                                      documentation=metric['documentation'],
-                                      labels=metric['labels_mapping'].keys())
+                                          documentation=metric['documentation'],
+                                          labels=metric['labels_mapping'].keys())
                 exposed_metrics.add(metric['name'])
-            gauge.add_metric(metric['labels_mapping'].values(), float(item['lastvalue']))
+            gauge.add_metric(metric['labels_mapping'].values(), float(item['lastvalue']),
+                             int(item['lastclock']))
         if gauge:
             yield gauge
 

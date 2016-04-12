@@ -10,7 +10,7 @@ if sys.version_info[0] < 3:
     import subprocess32 as subprocess  # backported stdlib package
 else:
     import subprocess
-from prometheus_client.parser import text_string_to_metric_families
+from zabbix_exporter.prometheus import text_string_to_metric_families
 from pytest_localserver.http import WSGIServer
 from werkzeug.wrappers import Response, Request
 
@@ -67,7 +67,8 @@ def test_explicit_config(zabbixserver):
         (u'uwsgi_rss',
          {u'app': u'rough-snowflake',
           u'instance': u'rough-snowflake-web'},
-         351182848.0)]
+         351182848.0,
+         1460359130)]
 
     assert metrics[1].name == 'uwsgi_workers'
     assert metrics[1].documentation == 'UWSGI workers'
@@ -77,12 +78,12 @@ def test_explicit_config(zabbixserver):
          {u'app': u'rough-snowflake',
           u'instance': u'rough-snowflake-web',
           u'status': u'busy'},
-         6.0),
+         6.0, 1460359143),
         (u'uwsgi_workers',
          {u'app': u'rough-snowflake',
           u'instance': u'rough-snowflake-web',
           u'status': u'idle'},
-         10.0)]
+         10.0, 1460359143)]
 
 
 def test_implicit_config(zabbixserver):

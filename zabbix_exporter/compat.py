@@ -1,5 +1,4 @@
 # coding: utf-8
-
 try:
     from http.server import HTTPServer, BaseHTTPRequestHandler
 except ImportError:

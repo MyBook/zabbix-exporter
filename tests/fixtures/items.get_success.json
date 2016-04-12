@@ -7,7 +7,7 @@
             "key_": "local.metric[uwsgi,sum,rough-snowflake,rss]",
             "hostid": "4",
             "value_type": "3",
-            "lastclock": "1460359143",
+            "lastclock": "1460359130",
             "lastvalue": "351182848"
         },
         {
