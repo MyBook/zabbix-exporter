@@ -3,7 +3,7 @@ import logging
 import re
 
 import pyzabbix
-from prometheus_client import CONTENT_TYPE_LATEST, REGISTRY, Counter, Summary
+from prometheus_client import CONTENT_TYPE_LATEST, REGISTRY, Counter, Gauge, Summary, CollectorRegistry
 
 from .compat import BaseHTTPRequestHandler
 from .prometheus import GaugeMetricFamily, generate_latest
@@ -12,11 +12,15 @@ from .utils import SortedDict
 logger = logging.getLogger(__name__)
 
 
-scrapes_total = Counter('zabbix_exporter_scrapes_total', 'Number of scrapes')
-scrapes_seconds = Summary('zabbix_exporter_scrape_duration_seconds', 'Scrape total seconds')
-api_requests_total = Counter('zabbix_exporter_api_requests_total', 'Requests to Zabbix API')
-api_bytes_total = Counter('zabbix_exporter_api_bytes_total', 'Bytes in response from Zabbix API (after decompression)')
-api_seconds_total = Counter('zabbix_exporter_api_seconds_total', 'Seconds spent fetching from Zabbix API')
+exporter_registry = CollectorRegistry()  # makes sure to collect metrics after ZabbixCollector
+
+scrapes_total = Counter('zabbix_exporter_scrapes_total', 'Number of scrapes', registry=exporter_registry)
+scrapes_seconds = Summary('zabbix_exporter_scrape_duration_seconds', 'Scrape total seconds', registry=exporter_registry)
+api_requests_total = Counter('zabbix_exporter_api_requests_total', 'Requests to Zabbix API', registry=exporter_registry)
+api_bytes_total = Counter('zabbix_exporter_api_bytes_total', 'Bytes in response from Zabbix API (after decompression)', registry=exporter_registry)
+api_seconds_total = Counter('zabbix_exporter_api_seconds_total', 'Seconds spent fetching from Zabbix API', registry=exporter_registry)
+metrics_count_total = Gauge('zabbix_exporter_metrics_total', 'Number of exported zabbix metrics', registry=exporter_registry)
+series_count_total = Gauge('zabbix_exporter_series_total', 'Number of exported zabbix values', registry=exporter_registry)
 
 
 def sanitize_key(string):
@@ -87,6 +91,7 @@ class ZabbixCollector(object):
                                        sortfield='key_')
             api_bytes_total.inc()
             exposed_metrics = set()
+            series_count = 0
             gauge = None
             enable_timestamps = self.options.get('enable_timestamps', False)
 
@@ -107,8 +112,11 @@ class ZabbixCollector(object):
                     exposed_metrics.add(metric['name'])
                 gauge.add_metric(metric['labels_mapping'].values(), float(item['lastvalue']),
                                  int(item['lastclock']) if enable_timestamps else None)
+                series_count += 1
             if gauge:
                 yield gauge
+        metrics_count_total.set(len(exposed_metrics))
+        series_count_total.set(series_count)
 
     def is_exportable(self, item):
         return item['value_type'] in {'0', '3'}  # only numeric/float values
@@ -118,7 +126,7 @@ class MetricsHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
             scrapes_total.inc()
-            response = generate_latest(REGISTRY)
+            response = generate_latest(REGISTRY) + generate_latest(exporter_registry)
             status = 200
         except Exception:
             logger.exception('Fetch failed')
