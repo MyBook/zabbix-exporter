@@ -62,7 +62,15 @@ class ZabbixCollector(object):
         for pattern, attrs in self.key_patterns.items():
             match = re.match(pattern, item['key_'])
             if match:
+                # process metric name
                 metric = attrs.get('name', metric)
+
+                def repl(m):
+                    asterisk_index = int(m.group(1))
+                    return match.group(asterisk_index)
+                metric = re.sub('\$(\d+)', repl, metric)
+
+                # create labels
                 for label_name, match_group in attrs.get('labels', {}).items():
                     label_value = match.group(int(match_group[1]))
                     if label_value in attrs.get('labels_reject', {}):

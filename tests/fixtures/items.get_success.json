@@ -2,6 +2,15 @@
     "jsonrpc": "2.0",
     "result": [
         {
+            "itemid": "120",
+            "name": "Redis connected clients",
+            "key_": "local.metric[redis,connected_clients,6380]",
+            "hostid": "4",
+            "value_type": "3",
+            "lastclock": "1460359130",
+            "lastvalue": "10"
+        },
+        {
             "itemid": "126",
             "name": "UWSGI RSS sum",
             "key_": "local.metric[uwsgi,sum,rough-snowflake,rss]",

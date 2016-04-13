@@ -14,5 +14,9 @@ metrics:
       name: 'uwsgi_rss'
       labels:
         app: $1
+    - key: 'local.metric[redis,*,*]'
+      name: 'redis_$1'
+      labels:
+        port: $2
     - key: 'system.metric'
     - key: 'zfs.total_bytes'
