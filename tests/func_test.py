@@ -56,7 +56,8 @@ def test_explicit_config(zabbixserver):
     sleep(1)
     response = requests.get('http://localhost:9224/metrics/')
     p.send_signal(signal.SIGINT)  # ensure coverage is collected
-    metrics = list(text_string_to_metric_families(response.text))
+    metrics = [m for m in text_string_to_metric_families(response.text)
+               if not m.name.startswith('zabbix_exporter')]
 
     assert len(metrics) == 3
 
@@ -100,7 +101,8 @@ def test_disable_timestamps_config(zabbixserver):
     sleep(1)
     response = requests.get('http://localhost:9224/metrics/')
     p.send_signal(signal.SIGINT)  # ensure coverage is collected
-    metrics = list(text_string_to_metric_families(response.text))
+    metrics = [m for m in text_string_to_metric_families(response.text)
+               if not m.name.startswith('zabbix_exporter')]
 
     assert len(metrics) == 3
 
@@ -142,7 +144,9 @@ def test_implicit_config(zabbixserver):
     sleep(1)
     response = requests.get('http://localhost:9224/metrics/')
     p.send_signal(signal.SIGINT)  # ensure coverage is collected
-    metrics = list(text_string_to_metric_families(response.text))
+    metrics = [m for m in text_string_to_metric_families(response.text)
+               if not m.name.startswith('zabbix_exporter')]
+
 
     assert [m.name for m in metrics] == [
         u'local_metric_uwsgi_sum_rough_snowflake_rss_',

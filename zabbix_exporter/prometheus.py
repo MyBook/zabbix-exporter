@@ -27,7 +27,12 @@ def generate_latest(registry=core.REGISTRY):
         output.append('# HELP {0} {1}'.format(
             metric.name, metric.documentation.replace('\\', r'\\').replace('\n', r'\n')))
         output.append('\n# TYPE {0} {1}\n'.format(metric.name, metric.type))
-        for name, labels, value, timestamp in metric.samples:
+        for sample in metric.samples:
+            if len(sample) == 3:
+                name, labels, value = sample
+                timestamp = None
+            else:
+                name, labels, value, timestamp = sample
             if labels:
                 labelstr = '{{{0}}}'.format(','.join(
                     ['{0}="{1}"'.format(

@@ -75,12 +75,13 @@ def cli(**settings):
     else:
         exporter_config = {}
 
+    base_logger = logging.getLogger('zabbix_exporter')
+    handler = logging.StreamHandler()
+    base_logger.addHandler(handler)
+    base_logger.setLevel(logging.ERROR)
+    handler.setFormatter(logging.Formatter('[%(asctime)s] %(message)s', "%Y-%m-%d %H:%M:%S"))
     if settings['verbose']:
-        base_logger = logging.getLogger('zabbix_exporter')
-        handler = logging.StreamHandler()
-        base_logger.addHandler(handler)
-        base_logger.setLevel(logging.DEBUG)
-        handler.setFormatter(logging.Formatter('[%(asctime)s] %(message)s', "%Y-%m-%d %H:%M:%S"))
+        base_logger.setLevel(logging.INFO)
 
     click.echo('Exporter for {base_url}, user: {login}, password: ***'.format(
         base_url=settings['url'].rstrip('/'),
