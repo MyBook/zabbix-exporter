@@ -3,8 +3,7 @@
    Code is vendored and forked to enable timestamps support in python client
    Copyright 2015 The Prometheus Authors
 """
-import StringIO
-
+from .compat import StringIO
 from prometheus_client import core
 
 
