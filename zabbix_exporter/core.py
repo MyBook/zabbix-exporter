@@ -15,7 +15,6 @@ logger = logging.getLogger(__name__)
 exporter_registry = CollectorRegistry()  # makes sure to collect metrics after ZabbixCollector
 
 scrapes_total = Counter('zabbix_exporter_scrapes_total', 'Number of scrapes', registry=exporter_registry)
-scrapes_seconds = Summary('zabbix_exporter_scrape_duration_seconds', 'Scrape total seconds', registry=exporter_registry)
 api_requests_total = Counter('zabbix_exporter_api_requests_total', 'Requests to Zabbix API', registry=exporter_registry)
 api_bytes_total = Counter('zabbix_exporter_api_bytes_total', 'Bytes in response from Zabbix API (after decompression)', registry=exporter_registry)
 api_seconds_total = Counter('zabbix_exporter_api_seconds_total', 'Seconds spent fetching from Zabbix API', registry=exporter_registry)
@@ -94,35 +93,34 @@ class ZabbixCollector(object):
         }
 
     def collect(self):
-        with scrapes_seconds.time():
-            items = self.zapi.item.get(output=['name', 'key_', 'hostid', 'lastvalue', 'lastclock', 'value_type'],
-                                       sortfield='key_')
-            api_bytes_total.inc()
-            exposed_metrics = set()
-            series_count = 0
-            gauge = None
-            enable_timestamps = self.options.get('enable_timestamps', False)
+        items = self.zapi.item.get(output=['name', 'key_', 'hostid', 'lastvalue', 'lastclock', 'value_type'],
+                                   sortfield='key_')
+        api_bytes_total.inc()
+        exposed_metrics = set()
+        series_count = 0
+        gauge = None
+        enable_timestamps = self.options.get('enable_timestamps', False)
 
-            for item in items:
-                if not self.is_exportable(item):
-                    logger.debug('Dropping unsupported metric %s', item['key_'])
-                    continue
-                metric = self.process_metric(item)
-                if not metric:
-                    continue
+        for item in items:
+            if not self.is_exportable(item):
+                logger.debug('Dropping unsupported metric %s', item['key_'])
+                continue
+            metric = self.process_metric(item)
+            if not metric:
+                continue
 
-                if metric['name'] not in exposed_metrics:
-                    if gauge:
-                        yield gauge
-                    gauge = GaugeMetricFamily(name=metric['name'],
-                                              documentation=metric['documentation'],
-                                              labels=metric['labels_mapping'].keys())
-                    exposed_metrics.add(metric['name'])
-                gauge.add_metric(metric['labels_mapping'].values(), float(item['lastvalue']),
-                                 int(item['lastclock']) if enable_timestamps else None)
-                series_count += 1
-            if gauge:
-                yield gauge
+            if metric['name'] not in exposed_metrics:
+                if gauge:
+                    yield gauge
+                gauge = GaugeMetricFamily(name=metric['name'],
+                                          documentation=metric['documentation'],
+                                          labels=metric['labels_mapping'].keys())
+                exposed_metrics.add(metric['name'])
+            gauge.add_metric(metric['labels_mapping'].values(), float(item['lastvalue']),
+                             int(item['lastclock']) if enable_timestamps else None)
+            series_count += 1
+        if gauge:
+            yield gauge
         metrics_count_total.set(len(exposed_metrics))
         series_count_total.set(series_count)
 
