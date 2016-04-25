@@ -36,6 +36,7 @@ def validate_settings(settings):
 @click.option('--verify-tls/--no-verify', help='Enable TLS cert verification [default: true]', default=True)
 @click.option('--timeout', help='API read/connect timeout', default=5)
 @click.option('--verbose', is_flag=True)
+@click.option('--dump-metrics', is_flag=True)
 @click.option('--version', is_flag=True)
 def cli(**settings):
     """Zabbix metrics exporter for Prometheus
@@ -83,21 +84,31 @@ def cli(**settings):
     if settings['verbose']:
         base_logger.setLevel(logging.INFO)
 
-    click.echo('Exporter for {base_url}, user: {login}, password: ***'.format(
-        base_url=settings['url'].rstrip('/'),
-        login=settings['login'],
-        password=settings['password']
-    ))
-
-    REGISTRY.register(ZabbixCollector(
+    collector = ZabbixCollector(
         base_url=settings['url'].rstrip('/'),
         login=settings['login'],
         password=settings['password'],
         verify_tls=settings['verify_tls'],
         timeout=settings['timeout'],
         **exporter_config
-    ))
+    )
+
+    if settings['dump_metrics']:
+        for item in collector.zapi.item.get(output=['name', 'key_', 'hostid', 'lastvalue', 'lastclock', 'value_type'],
+                                            sortfield='key_'):
+            click.echo('{host}\t{key} = {value}'.format(
+                host=item['hostid'],
+                key=item['key_'], value=item['lastvalue']
+            ))
+        return
+
+    REGISTRY.register(collector)
     httpd = HTTPServer(('', int(settings['port'])), MetricsHandler)
+    click.echo('Exporter for {base_url}, user: {login}, password: ***'.format(
+        base_url=settings['url'].rstrip('/'),
+        login=settings['login'],
+        password=settings['password']
+    ))
     click.echo('Exporting Zabbix metrics on http://0.0.0.0:{}'.format(settings['port']))
     httpd.serve_forever()
 
