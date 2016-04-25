@@ -74,12 +74,15 @@ class ZabbixCollector(object):
                     return match.group(asterisk_index)
                 metric = re.sub('\$(\d+)', repl, metric)
 
+                # ignore metrics with rejected placeholders
+                for rejected in attrs.get('reject', []):
+                    if re.search(rejected, item['key_']):
+                        logger.debug('Rejecting metric %s (matched %s)', rejected, metric)
+                        return
+
                 # create labels
                 for label_name, match_group in attrs.get('labels', {}).items():
                     label_value = match.group(int(match_group[1]))
-                    if label_value in attrs.get('labels_reject', {}):
-                        logger.debug('Rejecting metric label %s for %s', label_value, metric)
-                        return
                     labels_mapping[label_name] = label_value
                 metric_options = attrs
                 break

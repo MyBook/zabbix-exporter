@@ -26,7 +26,7 @@ zabbix_exporter
               labels:
                 app: $1
                 status: $2
-              labels_reject:
+              reject:
                 - 'total'
 
     Options:

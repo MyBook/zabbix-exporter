@@ -61,7 +61,7 @@ def cli(**settings):
                labels:
                  app: $1
                  status: $2
-               labels_reject:
+               reject:
                  - 'total'
     """
     if settings['version']:

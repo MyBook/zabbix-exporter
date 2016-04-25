@@ -8,7 +8,7 @@ metrics:
       labels:
         app: $1
         status: $2
-      labels_reject:
+      reject:
         - 'total'
     - key: 'local.metric[uwsgi,sum,*,rss]'
       name: 'uwsgi_rss'
