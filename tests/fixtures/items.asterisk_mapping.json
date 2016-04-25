@@ -1,0 +1,33 @@
+{
+    "jsonrpc": "2.0",
+    "result": [
+        {
+            "itemid": "120",
+            "name": "UWSGI exceptions projectA",
+            "key_": "local.metric[uwsgi,sum,projectA,exceptions,foo]",
+            "hostid": "4",
+            "value_type": "3",
+            "lastclock": "1460359130",
+            "lastvalue": "10"
+        },
+        {
+            "itemid": "121",
+            "name": "UWSGI requests projectA",
+            "key_": "local.metric[uwsgi,sum,projectA,requests,foo]",
+            "hostid": "4",
+            "value_type": "3",
+            "lastclock": "1460359130",
+            "lastvalue": "100"
+        },
+        {
+            "itemid": "122",
+            "name": "UWSGI exceptions projectB",
+            "key_": "local.metric[uwsgi,sum,projectB,exceptions,foo]",
+            "hostid": "4",
+            "value_type": "3",
+            "lastclock": "1460359130",
+            "lastvalue": "1000"
+        }
+    ],
+    "id":1
+}

@@ -1,0 +1,7 @@
+---
+explicit_metrics: true
+metrics:
+    - key: 'local.metric[uwsgi,sum,*,*,foo]'
+      name: 'uwsgi_$2'
+      labels:
+        app: $1

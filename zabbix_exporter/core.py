@@ -1,6 +1,7 @@
 # coding: utf-8
 import logging
 import re
+from collections import OrderedDict
 
 import pyzabbix
 from prometheus_client import CONTENT_TYPE_LATEST, REGISTRY, Counter, Gauge, Summary, CollectorRegistry
@@ -32,7 +33,7 @@ def prepare_regex(key_pattern):
 
 class ZabbixCollector(object):
 
-    def __init__(self, base_url, login, password, verify_tls, timeout, **options):
+    def __init__(self, base_url, login, password, verify_tls=True, timeout=None, **options):
         self.options = options
         self.key_patterns = {prepare_regex(metric['key']): metric
                              for metric in options.get('metrics', [])}
@@ -55,6 +56,10 @@ class ZabbixCollector(object):
                              for row in self.zapi.host.get(output=['hostid', 'name'])}
 
     def process_metric(self, item):
+        if not self.is_exportable(item):
+            logger.debug('Dropping unsupported metric %s', item['key_'])
+            return
+
         metric = item['key_']
         metric_options = {}
         labels_mapping = SortedDict()
@@ -74,18 +79,19 @@ class ZabbixCollector(object):
                     label_value = match.group(int(match_group[1]))
                     if label_value in attrs.get('labels_reject', {}):
                         logger.debug('Rejecting metric label %s for %s', label_value, metric)
-                        return None
+                        return
                     labels_mapping[label_name] = label_value
                 metric_options = attrs
                 break
         else:
             if self.options.get('explicit_metrics', False):
                 logger.debug('Dropping implicit metric name %s', item['key_'])
-                return None
+                return
 
         # automatic host -> instance labeling
         labels_mapping['instance'] = self.host_mapping[item['hostid']]
 
+        logger.debug('Converted: %s -> %s [%s]', item['key_'], metric, labels_mapping)
         return {
             'name': sanitize_key(metric),
             'documentation': metric_options.get('help', item['name']),
@@ -93,35 +99,33 @@ class ZabbixCollector(object):
         }
 
     def collect(self):
+        series_count = 0
+        enable_timestamps = self.options.get('enable_timestamps', False)
+        # We need to iterate metrics twice, because zabbix metric names order
+        # does not come in same order as prometheus metric names
+        metric_families = OrderedDict()
         items = self.zapi.item.get(output=['name', 'key_', 'hostid', 'lastvalue', 'lastclock', 'value_type'],
                                    sortfield='key_')
-        api_bytes_total.inc()
-        exposed_metrics = set()
-        series_count = 0
-        gauge = None
-        enable_timestamps = self.options.get('enable_timestamps', False)
 
         for item in items:
-            if not self.is_exportable(item):
-                logger.debug('Dropping unsupported metric %s', item['key_'])
-                continue
             metric = self.process_metric(item)
             if not metric:
                 continue
 
-            if metric['name'] not in exposed_metrics:
-                if gauge:
-                    yield gauge
+            if metric['name'] not in metric_families:
                 gauge = GaugeMetricFamily(name=metric['name'],
                                           documentation=metric['documentation'],
                                           labels=metric['labels_mapping'].keys())
-                exposed_metrics.add(metric['name'])
-            gauge.add_metric(metric['labels_mapping'].values(), float(item['lastvalue']),
-                             int(item['lastclock']) if enable_timestamps else None)
+                metric_families[metric['name']] = gauge
+            metric_families[metric['name']].add_metric(
+                metric['labels_mapping'].values(), float(item['lastvalue']),
+                int(item['lastclock']) if enable_timestamps else None)
             series_count += 1
-        if gauge:
-            yield gauge
-        metrics_count_total.set(len(exposed_metrics))
+
+        for family in metric_families.values():
+            yield family
+
+        metrics_count_total.set(len(metric_families))
         series_count_total.set(series_count)
 
     def is_exportable(self, item):

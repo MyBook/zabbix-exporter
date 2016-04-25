@@ -82,7 +82,7 @@ def cli(**settings):
     base_logger.setLevel(logging.ERROR)
     handler.setFormatter(logging.Formatter('[%(asctime)s] %(message)s', "%Y-%m-%d %H:%M:%S"))
     if settings['verbose']:
-        base_logger.setLevel(logging.INFO)
+        base_logger.setLevel(logging.DEBUG)
 
     collector = ZabbixCollector(
         base_url=settings['url'].rstrip('/'),
