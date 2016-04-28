@@ -31,7 +31,7 @@ def test_configs(zabbixserver, config_name, timestamps):
 
     assert len(metrics) == 4
     assert metrics[0].name == 'redis_connected_clients'
-    assert metrics[0].type == 'gauge'
+    assert metrics[0].type == 'untyped'
     assert metrics[0].samples == [
         (u'redis_connected_clients',
          {u'port': u'6380',
@@ -40,7 +40,7 @@ def test_configs(zabbixserver, config_name, timestamps):
 
     assert metrics[1].name == 'uwsgi_rss'
     assert metrics[1].documentation == 'UWSGI RSS sum'
-    assert metrics[1].type == 'gauge'
+    assert metrics[1].type == 'untyped'
     assert metrics[1].samples == [
         (u'uwsgi_rss',
          {u'app': u'rough-snowflake',

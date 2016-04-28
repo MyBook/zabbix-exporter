@@ -7,7 +7,7 @@ import pyzabbix
 from prometheus_client import CONTENT_TYPE_LATEST, REGISTRY, Counter, Gauge, Summary, CollectorRegistry
 
 from .compat import BaseHTTPRequestHandler
-from .prometheus import GaugeMetricFamily, generate_latest
+from .prometheus import MetricFamily, generate_latest
 from .utils import SortedDict
 
 logger = logging.getLogger(__name__)
@@ -97,6 +97,7 @@ class ZabbixCollector(object):
         logger.debug('Converted: %s -> %s [%s]', item['key_'], metric, labels_mapping)
         return {
             'name': sanitize_key(metric),
+            'type': metric_options.get('type', 'untyped'),  # untyped by default
             'documentation': metric_options.get('help', item['name']),
             'labels_mapping': labels_mapping,
         }
@@ -116,17 +117,18 @@ class ZabbixCollector(object):
                 continue
 
             if metric['name'] not in metric_families:
-                gauge = GaugeMetricFamily(name=metric['name'],
-                                          documentation=metric['documentation'],
-                                          labels=metric['labels_mapping'].keys())
-                metric_families[metric['name']] = gauge
+                family = MetricFamily(typ=metric['type'],
+                                      name=metric['name'],
+                                      documentation=metric['documentation'],
+                                      labels=metric['labels_mapping'].keys())
+                metric_families[metric['name']] = family
             metric_families[metric['name']].add_metric(
                 metric['labels_mapping'].values(), float(item['lastvalue']),
                 int(item['lastclock']) if enable_timestamps else None)
             series_count += 1
 
-        for family in metric_families.values():
-            yield family
+        for f in metric_families.values():
+            yield f
 
         metrics_count_total.set(len(metric_families))
         series_count_total.set(series_count)

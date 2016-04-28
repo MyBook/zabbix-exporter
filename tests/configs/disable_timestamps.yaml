@@ -5,6 +5,7 @@ metrics:
     - key: 'local.metric[uwsgi,workers,*,*]'
       name: 'uwsgi_workers'
       help: 'UWSGI workers'
+      type: 'gauge'
       labels:
         app: $1
         status: $2

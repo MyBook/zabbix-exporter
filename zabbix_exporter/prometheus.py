@@ -7,15 +7,19 @@ from .compat import StringIO
 from prometheus_client import core
 
 
-class GaugeMetricFamily(core.GaugeMetricFamily):
+class MetricFamily(core.Metric):
+
+    def __init__(self, typ, name, documentation, value=None, labels=None):
+        core.Metric.__init__(self, name, documentation, typ)
+        if labels is not None and value is not None:
+            raise ValueError('Can only specify at most one of value and labels.')
+        if labels is None:
+          labels = []
+        self._labelnames = labels
+        if value is not None:
+          self.add_metric([], value)
 
     def add_metric(self, labels, value, timestamp=None):
-        '''Add a metric to the metric family.
-
-        Args:
-          labels: A list of label values
-          value: A float
-        '''
         self.samples.append((self.name, dict(zip(self._labelnames, labels)), value, timestamp))
 
 
@@ -235,6 +239,7 @@ def text_fd_to_metric_families(fd):
                     'gauge': [''],
                     'summary': ['_count', '_sum', ''],
                     'histogram': ['_count', '_sum', '_bucket'],
+                    'untyped': [''],
                     }.get(typ, [parts[2]])
                 allowed_names = [name + n for n in allowed_names]
             else:
