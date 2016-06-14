@@ -1,0 +1,34 @@
+{
+    "jsonrpc": "2.0",
+    "result": [
+        {
+            "itemid": "130",
+            "name": "ZFS bytes used",
+            "key_": "local.metric[zpool,used,tank]",
+            "hostid": "3",
+            "value_type": "3",
+            "lastclock": "1460359140",
+            "lastvalue": "749471793152"
+        },
+        {
+            "itemid": "131",
+            "name": "ZFS bytes total",
+            "key_": "local.metric[zpool,total,tank]",
+            "hostid": "3",
+            "value_type": "3",
+            "lastclock": "1460359140",
+            "lastvalue": "970662608896"
+        },
+        {
+            "itemid": "132",
+            "name": "ZFS bytes free percent",
+            "key_": "local.metric[zpool,pfree,tank]",
+            "hostid": "3",
+            "value_type": "3",
+            "lastclock": "1460359140",
+            "lastvalue": "23.0000"
+        }
+    ],
+    "id":1
+}
+

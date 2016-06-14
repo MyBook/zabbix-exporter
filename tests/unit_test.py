@@ -36,3 +36,24 @@ def test_metric_families_dont_override_each_other(zabbixserver):
           None),
          ]
     ]
+
+
+def test_reject_labels(zabbixserver):
+    config = yaml.safe_load(open('tests/configs/reject_labels.conf.yml'))
+    collector = ZabbixCollector(base_url=zabbixserver.url, login='demo', password='demo', **config)
+
+    result_json = open('tests/fixtures/items.reject_labels.json').read()
+    zabbixserver.serve_content(result_json)
+    metrics = [m.samples for m in collector.collect()]
+
+    assert metrics == [
+        [(u'zpool_size',
+          {'mode': u'used', 'pool': u'tank', 'instance': u'rough-snowflake-db'},
+          749471793152,
+          None),
+         (u'zpool_size',
+          {'mode': u'total', 'pool': u'tank', 'instance': u'rough-snowflake-db'},
+          970662608896,
+          None)
+         ],
+    ]

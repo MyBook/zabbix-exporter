@@ -69,6 +69,7 @@ def test_configs(zabbixserver, config_name, timestamps):
          23243473482, timestamps[4]),
     ]
 
+
 def test_implicit_config(zabbixserver):
     args = ['zabbix_exporter', '--url', zabbixserver.url,
             '--login', 'demo', '--password', 'demo', '--port', '9224', '--verbose']

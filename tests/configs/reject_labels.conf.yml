@@ -1,0 +1,11 @@
+---
+explicit_metrics: true
+metrics:
+    - key: 'local.metric[zpool,*,*]'
+      name: 'zpool_size'
+      labels:
+        mode: $1
+        pool: $2
+      reject:
+        - 'pfree'
+
