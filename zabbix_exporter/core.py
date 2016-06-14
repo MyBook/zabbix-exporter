@@ -75,10 +75,10 @@ class ZabbixCollector(object):
                 metric = re.sub('\$(\d+)', repl, metric)
 
                 # ignore metrics with rejected placeholders
-                for rejected in attrs.get('reject', []):
-                    if re.search(rejected, item['key_']):
-                        logger.debug('Rejecting metric %s (matched %s)', rejected, metric)
-                        return
+                rejected_matches = [r for r in attrs.get('reject', []) if re.search(r, item['key_'])]
+                if rejected_matches:
+                    logger.debug('Rejecting metric %s (matched %s)', rejected_matches[0], metric)
+                    continue  # allow to process metric by another rule
 
                 # create labels
                 for label_name, match_group in attrs.get('labels', {}).items():
