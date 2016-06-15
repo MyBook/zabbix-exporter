@@ -94,13 +94,7 @@ def cli(**settings):
     )
 
     if settings['dump_metrics']:
-        for item in collector.zapi.item.get(output=['name', 'key_', 'hostid', 'lastvalue', 'lastclock', 'value_type'],
-                                            sortfield='key_'):
-            click.echo('{host}\t{key} = {value}'.format(
-                host=item['hostid'],
-                key=item['key_'], value=item['lastvalue']
-            ))
-        return
+        return dump_metrics(collector)
 
     REGISTRY.register(collector)
     httpd = HTTPServer(('', int(settings['port'])), MetricsHandler)
@@ -113,3 +107,11 @@ def cli(**settings):
     httpd.serve_forever()
 
 
+def dump_metrics(collector):
+    for item in collector.zapi.item.get(output=['name', 'key_', 'hostid', 'lastvalue', 'lastclock', 'value_type'],
+                                        sortfield='key_'):
+        click.echo('{host:20}{key} = {value}'.format(
+            host=collector.host_mapping.get(item['hostid'], item['hostid']),
+            key=item['key_'], value=item['lastvalue']
+        ))
+    return
