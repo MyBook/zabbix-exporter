@@ -82,7 +82,10 @@ class ZabbixCollector(object):
 
                 # create labels
                 for label_name, match_group in attrs.get('labels', {}).items():
-                    label_value = match.group(int(match_group[1]))
+                    if match_group[0] == '$':
+                        label_value = match.group(int(match_group[1]))
+                    else:
+                        label_value = match_group
                     labels_mapping[label_name] = label_value
                 metric_options = attrs
                 break
