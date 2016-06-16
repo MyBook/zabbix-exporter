@@ -110,8 +110,10 @@ def cli(**settings):
 def dump_metrics(collector):
     for item in collector.zapi.item.get(output=['name', 'key_', 'hostid', 'lastvalue', 'lastclock', 'value_type'],
                                         sortfield='key_'):
-        click.echo('{host:20}{key} = {value}'.format(
+        click.echo('{host:20}{key} = {value}\n{name:>20}'.format(
             host=collector.host_mapping.get(item['hostid'], item['hostid']),
-            key=item['key_'], value=item['lastvalue']
+            key=item['key_'],
+            value=item['lastvalue'],
+            name=item['name']
         ))
     return
