@@ -36,7 +36,7 @@ def validate_settings(settings):
 @click.option('--verify-tls/--no-verify', help='Enable TLS cert verification [default: true]', default=True)
 @click.option('--timeout', help='API read/connect timeout', default=5)
 @click.option('--verbose', is_flag=True)
-@click.option('--dump-metrics', is_flag=True)
+@click.option('--dump-metrics', help='Output all metrics for human to write yaml config', is_flag=True)
 @click.option('--version', is_flag=True)
 def cli(**settings):
     """Zabbix metrics exporter for Prometheus

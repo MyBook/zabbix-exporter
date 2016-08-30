@@ -38,5 +38,7 @@ zabbix_exporter
       --verify-tls / --no-verify  Enable TLS cert verification [default: true]
       --timeout INTEGER           API read/connect timeout
       --verbose
+      --dump-metrics              Output all metrics for human to write yaml
+                                  config
       --version
       --help                      Show this message and exit.
