@@ -1,16 +1,8 @@
 # coding: utf-8
-import signal
-from functools import partial
-from time import sleep
 
 import pytest
 import requests
-import sys
 
-if sys.version_info[0] < 3:
-    import subprocess32 as subprocess  # backported stdlib package
-else:
-    import subprocess
 from zabbix_exporter.prometheus import text_string_to_metric_families
 
 
@@ -18,16 +10,15 @@ from zabbix_exporter.prometheus import text_string_to_metric_families
     ("disable_timestamps", (None, None, None, None, None)),
     ("explicit_config", (1460359130, 1460359130, 1460359143, 1460359143, 1460359140)),
 ])
-def test_configs(zabbixserver, config_name, timestamps):
-    args = ['zabbix_exporter', '--url', zabbixserver.url,
+def test_configs(zabbixserver, zabbix_exporter_cli, config_name, timestamps):
+    args = ['--url', zabbixserver.url,
             '--no-verify', '--config', 'tests/configs/%s.yaml' % config_name,
             '--login', 'demo', '--password', 'demo', '--port', '9224', '--verbose']
-    p = subprocess.Popen([' '.join(args)], stdout=subprocess.PIPE, shell=True)
-    sleep(1)
+    zabbix_exporter_cli(args)
+
     response = requests.get('http://localhost:9224/metrics/')
-    p.send_signal(signal.SIGINT)  # ensure coverage is collected
     metrics = [m for m in text_string_to_metric_families(response.text)
-               if not m.name.startswith('zabbix_exporter')]
+               if not m.name.startswith('zabbix_exporter_') and not m.name.startswith('process_')]
 
     assert len(metrics) == 4
     assert metrics[0].name == 'redis_connected_clients'
@@ -70,15 +61,13 @@ def test_configs(zabbixserver, config_name, timestamps):
     ]
 
 
-def test_implicit_config(zabbixserver):
-    args = ['zabbix_exporter', '--url', zabbixserver.url,
+def test_implicit_config(zabbixserver, zabbix_exporter_cli):
+    args = ['--url', zabbixserver.url,
             '--login', 'demo', '--password', 'demo', '--port', '9224', '--verbose']
-    p = subprocess.Popen([' '.join(args)], stdout=subprocess.PIPE, shell=True)
-    sleep(1)
+    zabbix_exporter_cli(args)
     response = requests.get('http://localhost:9224/metrics/')
-    p.send_signal(signal.SIGINT)  # ensure coverage is collected
     metrics = [m for m in text_string_to_metric_families(response.text)
-               if not m.name.startswith('zabbix_exporter')]
+               if not m.name.startswith('zabbix_exporter') and not m.name.startswith('process_')]
 
     assert [m.name for m in metrics] == [
         u'local_metric_redis_connected_clients_6380_',
@@ -87,18 +76,15 @@ def test_implicit_config(zabbixserver):
         u'local_metric_uwsgi_workers_rough_snowflake_idle_',
         u'local_metric_uwsgi_workers_rough_snowflake_total_',
         u'wtf',
-        u'zfs_total_bytes']
+        u'zfs_total_bytes'
+    ]
 
 
-def test_exporter_returns_500_on_scrape_errors(zabbixserver):
-    args = ['zabbix_exporter', '--url', zabbixserver.url,
+def test_exporter_returns_500_on_scrape_errors(zabbixserver, zabbix_exporter_cli):
+    args = ['--url', zabbixserver.url,
             '--no-verify', '--config', 'tests/configs/explicit_config.yaml',
             '--login', 'demo', '--password', 'demo', '--port', '9224', '--verbose']
-    p = subprocess.Popen([' '.join(args)], stdout=subprocess.PIPE, shell=True)
-    sleep(1)
+    zabbix_exporter_cli(args)
     zabbixserver.serve_content('', 500)
     response = requests.get('http://localhost:9224/metrics/')
-    p.send_signal(signal.SIGINT)  # ensure coverage is collected
     assert response.status_code == 500
-
-

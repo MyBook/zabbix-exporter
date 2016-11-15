@@ -1,9 +1,16 @@
 # coding: utf-8
+import sys
 from functools import partial
+from time import sleep
 
 import pytest
 from pytest_localserver.http import WSGIServer
 from werkzeug.wrappers import Response, Request
+
+if sys.version_info[0] < 3:
+    import subprocess32 as subprocess  # backported stdlib package
+else:
+    import subprocess
 
 
 def zabbix_fake_app(environ, start_response):
@@ -28,18 +35,28 @@ def zabbix_fake_app(environ, start_response):
     return response(environ, start_response)
 
 
-@pytest.fixture()
+@pytest.fixture
 def zabbixserver(request):
-    server = WSGIServer(application=zabbix_fake_app)
-    server.start()
-    request.addfinalizer(server.stop)
-    def func():
+    def func():  # noqa
         if getattr(server.app, 'status', None):
             del server.app.status
             del server.app.content
+    server = WSGIServer(application=zabbix_fake_app)
+    server.start()
+    request.addfinalizer(server.stop)
     request._addfinalizer(func, scope='function')
-    def serve_content(self, content, status=200):
+    def serve_content(self, content, status=200):  # noqa
         self.app.content = content
         self.app.status = status
     server.serve_content = partial(serve_content, server)
     return server
+
+
+@pytest.fixture
+def zabbix_exporter_cli(request):
+    def cli_launcher(args):
+        process = subprocess.Popen(['zabbix_exporter'] + args,
+                                  stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        request.addfinalizer(process.terminate)
+        sleep(1)
+    return cli_launcher

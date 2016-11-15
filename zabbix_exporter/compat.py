@@ -1,4 +1,4 @@
-# coding: utf-8
+# flake8: noqa
 try:
     from http.server import HTTPServer, BaseHTTPRequestHandler
 except ImportError:

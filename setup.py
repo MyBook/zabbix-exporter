@@ -53,7 +53,7 @@ setup(
     author="MyBook",
     author_email='coagulant@mybook.ru',
     url='https://github.com/Eksmo/zabbix-exporter',
-    packages=['zabbix_exporter',],
+    packages=['zabbix_exporter'],
     package_dir={'zabbix_exporter': 'zabbix_exporter'},
     include_package_data=True,
     install_requires=requirements,
