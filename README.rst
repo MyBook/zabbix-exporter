@@ -1,6 +1,11 @@
 zabbix_exporter
 ===============
 
+.. image:: https://travis-ci.org/sergeii/zabbix-exporter.svg?branch=master
+   :target: https://travis-ci.org/sergeii/zabbix-exporter
+
+Usage
+=====
 ::
 
     Usage: zabbix_exporter [OPTIONS]

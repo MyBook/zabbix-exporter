@@ -56,7 +56,7 @@ def zabbixserver(request):
 def zabbix_exporter_cli(request):
     def cli_launcher(args):
         process = subprocess.Popen(['zabbix_exporter'] + args,
-                                  stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         request.addfinalizer(process.terminate)
         sleep(1)
     return cli_launcher
