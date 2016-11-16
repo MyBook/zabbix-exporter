@@ -19,8 +19,8 @@ requirements = [
 ]
 
 test_requirements = [
-    'pytest',
-    'pytest-localserver'
+    'pytest>=3.0.0',
+    'pytest-localserver>=0.3.5',
 ]
 
 if sys.version_info[0] < 3:
