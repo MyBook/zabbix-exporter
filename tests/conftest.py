@@ -54,8 +54,12 @@ def zabbixserver(request):
 def zabbix_exporter_cli(request):
     def cli_launcher(args):
         httpd = cli(prog_name='zabbix_exporter', args=args + ['--return-server'], standalone_mode=False)
-        request.addfinalizer(httpd.shutdown)
         thread = threading.Thread(target=httpd.serve_forever)
+        def stop_server():  # noqa
+            httpd.shutdown()
+            httpd.server_close()
+            thread.join()
+        request.addfinalizer(stop_server)
         thread.start()
         sleep(1)
     return cli_launcher
