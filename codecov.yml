@@ -7,4 +7,5 @@ coverage:
       default:
         target: 0%
 
-comment: false
+comment:
+  layout: "header, diff, tree, changes"
