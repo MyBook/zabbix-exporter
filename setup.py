@@ -21,6 +21,8 @@ requirements = [
 test_requirements = [
     'pytest>=3.0.0',
     'pytest-localserver>=0.3.5',
+    'pytest-cov>=2.4.0',
+    'codecov>=1.4.0',
 ]
 
 
