@@ -4,6 +4,9 @@ zabbix_exporter
 .. image:: https://travis-ci.org/Eksmo/zabbix-exporter.svg?branch=master
    :target: https://travis-ci.org/Eksmo/zabbix-exporter
 
+.. image:: https://codecov.io/gh/Eksmo/zabbix-exporter/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/Eksmo/zabbix-exporter
+
 Usage
 =====
 ::
