@@ -38,6 +38,7 @@ def validate_settings(settings):
 @click.option('--verbose', is_flag=True)
 @click.option('--dump-metrics', help='Output all metrics for human to write yaml config', is_flag=True)
 @click.option('--version', is_flag=True)
+@click.option('--return-server', is_flag=True, help='Developer flag. Please ignore.')
 def cli(**settings):
     """Zabbix metrics exporter for Prometheus
 
@@ -103,6 +104,8 @@ def cli(**settings):
         login=settings['login'],
         password=settings['password']
     ))
+    if settings['return_server']:
+        return httpd
     click.echo('Exporting Zabbix metrics on http://0.0.0.0:{}'.format(settings['port']))
     httpd.serve_forever()
 

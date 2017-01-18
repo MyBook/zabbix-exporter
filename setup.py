@@ -23,9 +23,6 @@ test_requirements = [
     'pytest-localserver>=0.3.5',
 ]
 
-if sys.version_info[0] < 3:
-    test_requirements.append('subprocess32')
-
 
 class PyTest(TestCommand):
     user_options = [('pytest-args=', 'a', "Arguments to pass to py.test")]
@@ -76,5 +73,5 @@ setup(
     ],
     test_suite='tests',
     tests_require=test_requirements,
-    cmdclass = {'test': PyTest},
+    cmdclass={'test': PyTest},
 )

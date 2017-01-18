@@ -1,16 +1,14 @@
 # coding: utf-8
-import sys
+import threading
 from functools import partial
 from time import sleep
 
 import pytest
+
+from prometheus_client import REGISTRY
 from pytest_localserver.http import WSGIServer
 from werkzeug.wrappers import Response, Request
-
-if sys.version_info[0] < 3:
-    import subprocess32 as subprocess  # backported stdlib package
-else:
-    import subprocess
+from zabbix_exporter.commands import cli
 
 
 def zabbix_fake_app(environ, start_response):
@@ -55,8 +53,15 @@ def zabbixserver(request):
 @pytest.fixture
 def zabbix_exporter_cli(request):
     def cli_launcher(args):
-        process = subprocess.Popen(['zabbix_exporter'] + args,
-                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        request.addfinalizer(process.terminate)
+        httpd = cli(prog_name='zabbix_exporter', args=args + ['--return-server'], standalone_mode=False)
+        request.addfinalizer(httpd.shutdown)
+        thread = threading.Thread(target=httpd.serve_forever)
+        thread.start()
         sleep(1)
     return cli_launcher
+
+
+@pytest.fixture(autouse=True)
+def _clear_registry_collectors():
+    REGISTRY._collector_to_names.clear()
+    REGISTRY._names_to_collectors.clear()
