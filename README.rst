@@ -1,8 +1,8 @@
 zabbix_exporter
 ===============
 
-.. image:: https://travis-ci.org/sergeii/zabbix-exporter.svg?branch=master
-   :target: https://travis-ci.org/sergeii/zabbix-exporter
+.. image:: https://travis-ci.org/Eksmo/zabbix-exporter.svg?branch=master
+   :target: https://travis-ci.org/Eksmo/zabbix-exporter
 
 Usage
 =====
