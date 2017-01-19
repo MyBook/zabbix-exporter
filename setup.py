@@ -19,12 +19,10 @@ requirements = [
 ]
 
 test_requirements = [
-    'pytest',
-    'pytest-localserver'
+    'pytest>=3.0.0',
+    'pytest-localserver>=0.3.5',
+    'pytest-cov>=2.4.0',
 ]
-
-if sys.version_info[0] < 3:
-    test_requirements.append('subprocess32')
 
 
 class PyTest(TestCommand):
@@ -53,7 +51,7 @@ setup(
     author="MyBook",
     author_email='coagulant@mybook.ru',
     url='https://github.com/Eksmo/zabbix-exporter',
-    packages=['zabbix_exporter',],
+    packages=['zabbix_exporter'],
     package_dir={'zabbix_exporter': 'zabbix_exporter'},
     include_package_data=True,
     install_requires=requirements,
@@ -76,5 +74,5 @@ setup(
     ],
     test_suite='tests',
     tests_require=test_requirements,
-    cmdclass = {'test': PyTest},
+    cmdclass={'test': PyTest},
 )

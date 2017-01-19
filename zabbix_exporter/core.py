@@ -4,7 +4,7 @@ import re
 from collections import OrderedDict
 
 import pyzabbix
-from prometheus_client import CONTENT_TYPE_LATEST, REGISTRY, Counter, Gauge, Summary, CollectorRegistry
+from prometheus_client import CONTENT_TYPE_LATEST, REGISTRY, Counter, Gauge, CollectorRegistry
 
 from .compat import BaseHTTPRequestHandler
 from .prometheus import MetricFamily, generate_latest

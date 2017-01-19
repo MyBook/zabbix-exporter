@@ -1,0 +1,4 @@
+[run]
+branch = True
+include =
+    zabbix_exporter/*
