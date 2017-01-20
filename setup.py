@@ -45,7 +45,7 @@ class PyTest(TestCommand):
 
 setup(
     name='zabbix_exporter',
-    version='0.1.0',
+    version='1.0.0',
     description="zabbix metrics for Prometheus",
     long_description=readme + '\n\n' + history,
     author="MyBook",
@@ -63,7 +63,7 @@ setup(
         zabbix_exporter=zabbix_exporter:main
     """,
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Natural Language :: English',
@@ -71,6 +71,9 @@ setup(
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        "Programming Language :: Python :: Implementation :: CPython",
+        "Programming Language :: Python :: Implementation :: PyPy",
     ],
     test_suite='tests',
     tests_require=test_requirements,
