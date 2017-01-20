@@ -50,3 +50,10 @@ Usage
                                   config
       --version
       --help                      Show this message and exit.
+
+
+Deploying with Docker
+=====================
+::
+
+    docker run -d --name zabbix_exporter -v /path/to/your/config.yml:/zabbix_exporter/zabbix_exporter.yml --env=ZABBIX_URL="https://zabbix.example.com/" --env="ZABBIX_LOGIN=username" --env="ZABBIX_PASSWORD=secret" mybook/zabbix-exporter
