@@ -1,0 +1,9 @@
+explicit_metrics: true
+metrics:
+- key: 'local.metric[uwsgi,workers,*,*]'
+  name: 'uwsgi_workers'
+  labels:
+    app: $1
+    status: $2
+  reject:
+    - 'total'
