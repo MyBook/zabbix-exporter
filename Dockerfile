@@ -7,6 +7,7 @@ COPY config-example.yml /zabbix_exporter/zabbix_exporter.yml
 
 RUN pip install https://github.com/Eksmo/zabbix-exporter/archive/39b007f1968731b13c652e59569c6f1550eabb84.zip#egg=zabbix_exporter
 
+EXPOSE 9224
 VOLUME [ "/zabbix_exporter" ]
 
 USER zabbix_exporter
