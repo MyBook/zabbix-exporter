@@ -82,3 +82,10 @@ dist: clean
 
 install: clean
 	python setup.py install
+
+travis-build-docker:
+	@if [ "${TRAVIS_BRANCH}" = "master" ]; then\
+		docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD};\
+		docker build -t ${DOCKER_REPO}:latest -t ${DOCKER_REPO}:${TRAVIS_COMMIT_SHORT} .;\
+		docker push ${DOCKER_REPO};\
+	fi
