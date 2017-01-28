@@ -1,4 +1,11 @@
+sudo: required
 language: python
+services:
+  - docker
+env:
+  global:
+    - TRAVIS_COMMIT_SHORT=${TRAVIS_COMMIT::8}
+
 python:
   - "2.7"
   - "3.5"
@@ -8,3 +15,9 @@ install:
  - pip install tox
 script:
  - tox
+
+deploy:
+  provider: script
+  script: make travis-build-docker
+  on:
+    branch: master
