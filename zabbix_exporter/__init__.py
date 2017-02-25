@@ -1,7 +1,7 @@
 # coding: utf-8
 __author__ = 'MyBook'
 __email__ = 'dev@mybook.ru'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 
 envvar_prefix = 'ZABBIX'
 
