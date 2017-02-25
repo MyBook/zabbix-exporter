@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import os
+import re
 import sys
 from setuptools import setup
 from setuptools.command.test import test as TestCommand
@@ -43,14 +45,22 @@ class PyTest(TestCommand):
         sys.exit(errno)
 
 
+def get_version(package):
+    """
+    Return package version as listed in `__version__` in `init.py`.
+    """
+    init_py = open(os.path.join(package, '__init__.py')).read()
+    return re.search("__version__ = ['\"]([^'\"]+)['\"]", init_py).group(1)
+
+
 setup(
     name='zabbix_exporter',
-    version='1.0.0',
+    version=get_version('zabbix_exporter'),
     description="zabbix metrics for Prometheus",
     long_description=readme + '\n\n' + history,
     author="MyBook",
     author_email='coagulant@mybook.ru',
-    url='https://github.com/Eksmo/zabbix-exporter',
+    url='https://github.com/MyBook/zabbix-exporter',
     packages=['zabbix_exporter'],
     package_dir={'zabbix_exporter': 'zabbix_exporter'},
     include_package_data=True,
@@ -63,7 +73,7 @@ setup(
         zabbix_exporter=zabbix_exporter:main
     """,
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Natural Language :: English',
