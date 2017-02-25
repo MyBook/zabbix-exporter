@@ -24,7 +24,6 @@ notifications:
   email: false
   
 deploy:
-  matrix:
   - provider: script
     script: make travis-build-docker
     on:
