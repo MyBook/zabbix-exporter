@@ -1,11 +1,14 @@
 zabbix_exporter
 ===============
 
-.. image:: https://travis-ci.org/Eksmo/zabbix-exporter.svg?branch=master
-   :target: https://travis-ci.org/Eksmo/zabbix-exporter
+.. image:: https://img.shields.io/badge/python-2.7,%203.6-blue.svg
+    :target: https://pypi.python.org/pypi/zabbix-exporter/
 
-.. image:: https://codecov.io/gh/Eksmo/zabbix-exporter/branch/master/graph/badge.svg
-   :target: https://codecov.io/gh/Eksmo/zabbix-exporter
+.. image:: https://travis-ci.org/MyBook/zabbix-exporter.svg?branch=master
+    :target: https://travis-ci.org/MyBook/zabbix-exporter
+
+.. image:: https://codecov.io/gh/MyBook/zabbix-exporter/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/MyBook/zabbix-exporter
 
 Usage
 =====
