@@ -1,10 +1,12 @@
 # coding: utf-8
 import logging
+import sys
 
 import click
-import sys
 import yaml
 from prometheus_client import REGISTRY
+from raven import Client, setup_logging
+from raven.handlers.logging import SentryHandler
 
 import zabbix_exporter
 from zabbix_exporter.core import ZabbixCollector, MetricsHandler
@@ -38,6 +40,7 @@ def validate_settings(settings):
 @click.option('--verbose', is_flag=True)
 @click.option('--dump-metrics', help='Output all metrics for human to write yaml config', is_flag=True)
 @click.option('--version', is_flag=True)
+@click.option('--sentry', help='Sentry DSN')
 @click.option('--return-server', is_flag=True, help='Developer flag. Please ignore.')
 def cli(**settings):
     """Zabbix metrics exporter for Prometheus
@@ -96,6 +99,12 @@ def cli(**settings):
 
     if settings['dump_metrics']:
         return dump_metrics(collector)
+
+    if settings['sentry']:
+        reaven_client = Client(settings['sentry'])
+        handler = SentryHandler(reaven_client)
+        handler.setLevel(logging.ERROR)
+        setup_logging(handler)
 
     REGISTRY.register(collector)
     httpd = HTTPServer(('', int(settings['port'])), MetricsHandler)
