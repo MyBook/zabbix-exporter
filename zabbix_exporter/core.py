@@ -147,7 +147,7 @@ class MetricsHandler(BaseHTTPRequestHandler):
             response = generate_latest(REGISTRY) + generate_latest(exporter_registry)
             status = 200
         except Exception:
-            logger.exception('Fetch failed')
+            logger.error('Fetch failed', exc_info=True)
             response = ''
             status = 500
         self.send_response(status)
