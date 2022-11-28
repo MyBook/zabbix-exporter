@@ -2,6 +2,11 @@
 History
 =======
 
+1.0.3 (2022-11-28)
+------------------
+
+* Add zabbix filtering by hosts and item names
+
 1.0.2 (2017-02-25)
 ------------------
 

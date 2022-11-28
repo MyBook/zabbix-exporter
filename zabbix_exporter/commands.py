@@ -1,29 +1,19 @@
-# coding: utf-8
-import logging
-
 import click
-import sys
-import yaml
 from prometheus_client import REGISTRY
+from qrconfig import QRYamlConfig
 
-import zabbix_exporter
-from zabbix_exporter.core import ZabbixCollector, MetricsHandler
-from .compat import HTTPServer
-
-logger = logging.getLogger(__name__)
+from .server import create_exporter_server
+from .zabbix_collector import ZabbixSelectiveCollector
+from .logger import cmd_logger
 
 
 def validate_settings(settings):
     if not settings['url']:
-        click.echo('Please provide Zabbix API URL', err=True)
-        sys.exit(1)
+        raise Exception('Please provide Zabbix API URL')
     if not settings['login']:
-        click.echo('Please provide Zabbix username', err=True)
-        sys.exit(1)
+        raise Exception('Please provide Zabbix username')
     if not settings['password']:
-        click.echo('Please provide Zabbix account password', err=True)
-        sys.exit(1)
-    return True
+        raise Exception('Please provide Zabbix account password')
 
 
 @click.command()
@@ -36,14 +26,11 @@ def validate_settings(settings):
 @click.option('--verify-tls/--no-verify', help='Enable TLS cert verification [default: true]', default=True)
 @click.option('--timeout', help='API read/connect timeout', default=5)
 @click.option('--verbose', is_flag=True)
-@click.option('--dump-metrics', help='Output all metrics for human to write yaml config', is_flag=True)
-@click.option('--version', is_flag=True)
-@click.option('--return-server', is_flag=True, help='Developer flag. Please ignore.')
 def cli(**settings):
     """Zabbix metrics exporter for Prometheus
 
        Use config file to map zabbix metrics names/labels into prometheus.
-       Config below transfroms this:
+       Config below transforms this:
 
            local.metric[uwsgi,workers,myapp,busy] = 8
            local.metric[uwsgi,workers,myapp,idle] = 6
@@ -53,7 +40,7 @@ def cli(**settings):
            uwsgi_workers{instance="host1",app="myapp",status="busy"} 8
            uwsgi_workers{instance="host1",app="myapp",status="idle"} 6
 
-       YAML:
+       YAML config example:
 
        \b
            metrics:
@@ -64,59 +51,44 @@ def cli(**settings):
                  status: $2
                reject:
                  - 'total'
+               hosts:
+                 - name.of.host.1
+                 - name.of.host.2
+               item_names:
+                 - '*item.name.substr.1*'
+                 - '*item.name.substr.2*'
     """
-    if settings['version']:
-        click.echo('Version %s' % zabbix_exporter.__version__)
-        return
 
-    if not validate_settings(settings):
-        return
+    validate_settings(settings)
 
-    if settings['config']:
-        exporter_config = yaml.safe_load(open(settings['config']))
-    else:
-        exporter_config = {}
-
-    base_logger = logging.getLogger('zabbix_exporter')
-    handler = logging.StreamHandler()
-    base_logger.addHandler(handler)
-    base_logger.setLevel(logging.ERROR)
-    handler.setFormatter(logging.Formatter('[%(asctime)s] %(message)s', "%Y-%m-%d %H:%M:%S"))
     if settings['verbose']:
-        base_logger.setLevel(logging.DEBUG)
+        cmd_logger.setLevel('DEBUG')
+    else:
+        cmd_logger.setLevel('ERROR')
 
-    collector = ZabbixCollector(
-        base_url=settings['url'].rstrip('/'),
-        login=settings['login'],
-        password=settings['password'],
-        verify_tls=settings['verify_tls'],
-        timeout=settings['timeout'],
-        **exporter_config
+    exporter_config = QRYamlConfig(settings['config']) if settings['config'] else dict()
+
+    # create zabbix collector
+    collector = ZabbixSelectiveCollector(
+        explicit_metrics=exporter_config.parsing.explicit_metrics,
+        enable_timestamps=exporter_config.parsing.enable_timestamps,
+        enable_empty_hosts=exporter_config.parsing.enable_empty_hosts,
+        metrics=exporter_config.metrics,
+        zabbix_config=dict(base_url=settings['url'].rstrip('/'),
+                           login=settings['login'],
+                           password=settings['password'],
+                           verify_tls=settings['verify_tls'],
+                           timeout=settings['timeout'], ),
     )
-
-    if settings['dump_metrics']:
-        return dump_metrics(collector)
-
     REGISTRY.register(collector)
-    httpd = HTTPServer(('', int(settings['port'])), MetricsHandler)
+
+    # setup server
+    server = create_exporter_server(int(settings['port']))
     click.echo('Exporter for {base_url}, user: {login}, password: ***'.format(
         base_url=settings['url'].rstrip('/'),
         login=settings['login'],
         password=settings['password']
     ))
-    if settings['return_server']:
-        return httpd
+
     click.echo('Exporting Zabbix metrics on http://0.0.0.0:{}'.format(settings['port']))
-    httpd.serve_forever()
-
-
-def dump_metrics(collector):
-    for item in collector.zapi.item.get(output=['name', 'key_', 'hostid', 'lastvalue', 'lastclock', 'value_type'],
-                                        sortfield='key_'):
-        click.echo('{host:20}{key} = {value}\n{name:>20}'.format(
-            host=collector.host_mapping.get(item['hostid'], item['hostid']),
-            key=item['key_'],
-            value=item['lastvalue'],
-            name=item['name']
-        ))
-    return
+    server.serve_forever()

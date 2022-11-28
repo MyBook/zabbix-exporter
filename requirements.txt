@@ -1,0 +1,5 @@
+click==8.0.4
+prometheus-client==0.15.0
+pyzabbix==1.2.1
+qrconfig==1.0.4
+coloredlogs==15.0.1

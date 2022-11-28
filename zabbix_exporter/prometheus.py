@@ -1,14 +1,15 @@
-# coding: utf-8
-"""Code in this module is based on prometheus client https://github.com/prometheus/client_python
-   Code is vendored and forked to enable timestamps support in python client
-   Copyright 2015 The Prometheus Authors
 """
-from .compat import StringIO
-from prometheus_client import core
+Code in this module is based on prometheus client https://github.com/prometheus/client_python
+Code is vendored and forked to enable timestamps support in python client
+Copyright 2015 The Prometheus Authors
+"""
+
+import io
+import prometheus_client.core as core
+from prometheus_client.utils import floatToGoString
 
 
 class MetricFamily(core.Metric):
-
     def __init__(self, typ, name, documentation, value=None, labels=None):
         core.Metric.__init__(self, name, documentation, typ)
         if labels is not None and value is not None:
@@ -24,7 +25,7 @@ class MetricFamily(core.Metric):
 
 
 def generate_latest(registry=core.REGISTRY):
-    '''Returns the metrics from the registry in latest text format as a string.'''
+    """Returns the metrics from the registry in latest text format as a string."""
     output = []
     for metric in registry.collect():
         output.append('# HELP {0} {1}'.format(
@@ -34,16 +35,18 @@ def generate_latest(registry=core.REGISTRY):
             if len(sample) == 3:
                 name, labels, value = sample
                 timestamp = None
-            else:
+            elif len(sample) == 4:
                 name, labels, value, timestamp = sample
+            else:
+                name, labels, value, timestamp, *etc = sample
             if labels:
                 labelstr = '{{{0}}}'.format(','.join(
                     ['{0}="{1}"'.format(
-                     k, v.replace('\\', r'\\').replace('\n', r'\n').replace('"', r'\"'))
-                     for k, v in sorted(labels.items())]))
+                        k, v.replace('\\', r'\\').replace('\n', r'\n').replace('"', r'\"'))
+                        for k, v in sorted(labels.items())]))
             else:
                 labelstr = ''
-            output.append('{0}{1} {2}{3}\n'.format(name, labelstr, core._floatToGoString(value),
+            output.append('{0}{1} {2}{3}\n'.format(name, labelstr, floatToGoString(value),
                                                    ' %s' % timestamp if timestamp else ''))
     return ''.join(output).encode('utf-8')
 
@@ -53,7 +56,7 @@ def text_string_to_metric_families(text):
 
     See text_fd_to_metric_families.
     """
-    for metric_family in text_fd_to_metric_families(StringIO.StringIO(text)):
+    for metric_family in text_fd_to_metric_families(io.StringIO(text)):
         yield metric_family
 
 
@@ -240,7 +243,7 @@ def text_fd_to_metric_families(fd):
                     'summary': ['_count', '_sum', ''],
                     'histogram': ['_count', '_sum', '_bucket'],
                     'untyped': [''],
-                    }.get(typ, [parts[2]])
+                }.get(typ, [parts[2]])
                 allowed_names = [name + n for n in allowed_names]
             else:
                 # Ignore other comment tokens
