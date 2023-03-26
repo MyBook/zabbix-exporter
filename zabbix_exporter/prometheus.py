@@ -34,8 +34,12 @@ def generate_latest(registry=core.REGISTRY):
             if len(sample) == 3:
                 name, labels, value = sample
                 timestamp = None
-            else:
+            if len(sample) == 4:
                 name, labels, value, timestamp = sample
+            else:
+                #print(sample)
+                #in the new python version Elemplars needs to be dumped into a dummy var
+                name, labels, value, timestamp, _ = sample
             if labels:
                 labelstr = '{{{0}}}'.format(','.join(
                     ['{0}="{1}"'.format(
@@ -43,7 +47,7 @@ def generate_latest(registry=core.REGISTRY):
                      for k, v in sorted(labels.items())]))
             else:
                 labelstr = ''
-            output.append('{0}{1} {2}{3}\n'.format(name, labelstr, core._floatToGoString(value),
+            output.append('{0}{1} {2}{3}\n'.format(name, labelstr, float(value),
                                                    ' %s' % timestamp if timestamp else ''))
     return ''.join(output).encode('utf-8')
 

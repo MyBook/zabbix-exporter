@@ -48,7 +48,7 @@ class ZabbixCollector(object):
             api_requests_total.inc()
             api_bytes_total.inc(len(r.content))
             api_seconds_total.inc(r.elapsed.total_seconds())
-        self.zapi.session.hooks = {'response': measure_api_request}
+        # self.zapi.session.hooks = {'response': measure_api_request}
 
         self.zapi.login(login, password)
 
@@ -143,8 +143,9 @@ class ZabbixCollector(object):
 class MetricsHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
-            scrapes_total.inc()
+            #scrapes_total.inc()
             response = generate_latest(REGISTRY) + generate_latest(exporter_registry)
+            #response = bytearray(generate_latest(REGISTRY) + generate_latest(exporter_registry), encoding ='utf-8')
             status = 200
         except Exception:
             logger.exception('Fetch failed')

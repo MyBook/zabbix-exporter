@@ -89,3 +89,6 @@ travis-build-docker:
 		docker build -t ${DOCKER_REPO}:latest -t ${DOCKER_REPO}:${TRAVIS_COMMIT_SHORT} .;\
 		docker push ${DOCKER_REPO};\
 	fi
+
+docker:
+		docker build -t localzabbix:latest  .
